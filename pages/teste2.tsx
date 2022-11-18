@@ -1,26 +1,26 @@
 import Head from 'next/head'
 import Image from 'next/image'
 import styles from '../styles/Home.module.css'
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useRouter } from 'next/router'
 
-export default function Profile() {
+export default function Profile({ usersList }: any) {
   const router = useRouter()
   const [data, setData] = useState(null)
-  const [users, setUsers] = useState<any[]>([])
+  const [users, setUsers] = useState(usersList.data)
   const [isLoading, setLoading] = useState(false)
 
-  useEffect(() => {
-    setLoading(true)
-    fetch('https://reqres.in/api/users?page=2')
-      .then((res) => res.json())
-      .then((data) => {
-        console.log(data);
-        setData(data)
-        setUsers(data.data)
-        setLoading(false)
-      })
-  }, [])
+  // useEffect(() => {
+  //   setLoading(true)
+  //   fetch('https://reqres.in/api/users?page=2')
+  //     .then((res) => res.json())
+  //     .then((data) => {
+  //       console.log(data);
+  //       setData(data)
+  //       setUsers(data.data)
+  //       setLoading(false)
+  //     })
+  // }, [])
 
   if (isLoading) return <p>Loading...</p>
   if (!users) return <p>No profile data</p>
@@ -37,7 +37,7 @@ export default function Profile() {
       </button>
       <main className={styles.main}>
         {
-          users.map((user) => {
+          users.map((user: { email: string,  first_name: string}) => {
             return(
               <div key={user.email}>
                 <h3>{user.first_name}</h3>
@@ -62,4 +62,19 @@ export default function Profile() {
       </footer>
     </div>
   )
+}
+
+// This function gets called at build time
+export async function getStaticProps() {
+  // Call an external API endpoint to get posts
+  const res = await fetch('https://reqres.in/api/users?page=2')
+  const usersList = await res.json()
+
+  // By returning { props: { posts } }, the Blog component
+  // will receive `posts` as a prop at build time
+  return {
+    props: {
+      usersList,
+    },
+  }
 }
